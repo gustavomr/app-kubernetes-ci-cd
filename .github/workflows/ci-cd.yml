@@ -97,12 +97,6 @@ jobs:
           mkdir -p $HOME/.kube
           echo "$KUBE_CONFIG" > $HOME/.kube/config
 
-      - name: Deploy Database (idempotent)
-        run: |
-          kubectl apply -f k8s/database/namespace.yaml
-          kubectl apply -f k8s/database/postgres-secret.yaml
-          kubectl apply -f k8s/database/
-
       - name: Deploy to Dev
         run: |
           kubectl apply -f k8s/dev/namespace.yaml
