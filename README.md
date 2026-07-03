@@ -161,13 +161,15 @@ kubectl apply -f letsencrypt-issuer.yaml
 
 ### 10. Gerar KUBE_CONFIG para GitHub Actions
 
+O segredo `KUBE_CONFIG` deve conter o **conteúdo cru** do kubeconfig (YAML), **não** em base64.
+
 ```powershell
-[Convert]::ToBase64String(
-  [IO.File]::ReadAllBytes("$env:USERPROFILE\.kube\config")
-)
+# Exibir o conteúdo do kubeconfig
+Get-Content "$env:USERPROFILE\.kube\config"
 ```
 
-Adicione o resultado como secret `KUBE_CONFIG` no GitHub.
+Copie a saída inteira e adicione como secret **`KUBE_CONFIG`** no GitHub.
+> **⚠️ Importante**: Não use base64. O workflow usa `azure/setup-kubectl` e escreve o YAML diretamente em `~/.kube/config`. Basta colar o conteúdo como está no valor do secret.
 
 ## Como usar (após setup do cluster)
 
@@ -203,7 +205,7 @@ No repositório > Settings > Secrets and variables > Actions, crie:
 |--------|-----------|------------|
 | `DOCKER_USERNAME` | Usuário do Docker Hub | Seu usuário |
 | `DOCKER_PASSWORD` | Token de acesso do Docker Hub | [Account Settings > Security > New Access Token](https://hub.docker.com/settings/security) |
-| `KUBE_CONFIG` | kubeconfig em base64 | `[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\.kube\config"))` |
+| `KUBE_CONFIG` | kubeconfig (YAML cru, **não** base64) | `Get-Content "$env:USERPROFILE\.kube\config"` e colar o conteúdo |
 
 ### 3. Environments no GitHub (opcional)
 
@@ -229,8 +231,9 @@ O CI/CD fará todo o deploy automático.
 
 1. GitHub > Actions > workflow `CI/CD` > Run workflow
 2. Escolher `uat` ou `prod`
-3. Pipeline aplica `kubectl apply -f k8s/uat/` e faz deploy da imagem `:latest`
-4. Aplicação disponível em `https://uat.app.141-148-93-60.sslip.io` ou `https://app.141-148-93-60.sslip.io`
+3. Opcional: informar uma tag específica (`latest` por padrão)
+4. Pipeline aplica os manifests e faz deploy da imagem escolhida
+5. Aplicação disponível em `https://uat.app.141-148-93-60.sslip.io` ou `https://app.141-148-93-60.sslip.io`
 
 ## Rodar localmente (desenvolvimento)
 

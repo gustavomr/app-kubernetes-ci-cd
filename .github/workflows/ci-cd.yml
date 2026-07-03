@@ -12,6 +12,11 @@ on:
         options:
           - uat
           - prod
+      image_tag:
+        description: 'Tag da imagem Docker (default: latest)'
+        required: false
+        default: 'latest'
+        type: string
 
 env:
   DOCKER_USER: gustavomr
@@ -72,30 +77,36 @@ jobs:
             ${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }}
             ${{ env.DOCKER_USER }}/app-frontend:latest
 
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Configure Kube Config
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG" > $HOME/.kube/config
+
       - name: Deploy Database (idempotent)
-        uses: steebchen/kubectl@v2
-        with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          command: |
-            apply -f k8s/database/namespace.yaml &&
-            apply -f k8s/database/postgres-secret.yaml &&
-            apply -f k8s/database/
+        run: |
+          kubectl apply -f k8s/database/namespace.yaml
+          kubectl apply -f k8s/database/postgres-secret.yaml
+          kubectl apply -f k8s/database/
 
-      - name: Deploy to Dev (idempotent + image update)
-        uses: steebchen/kubectl@v2
-        with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          command: |
-            apply -f k8s/dev/ &&
-            set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ env.IMAGE_TAG }} -n dev &&
-            set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }} -n dev &&
-            rollout status deployment/backend -n dev &&
-            rollout status deployment/frontend -n dev
+      - name: Deploy to Dev
+        run: |
+          kubectl apply -f k8s/dev/
+          kubectl set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ env.IMAGE_TAG }} -n dev
+          kubectl set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }} -n dev
+          kubectl rollout status deployment/backend -n dev
+          kubectl rollout status deployment/frontend -n dev
 
-  deploy-manual:
-    if: github.event_name == 'workflow_dispatch'
+  deploy-to-uat:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'uat'
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: uat
     steps:
       - uses: actions/checkout@v4
 
@@ -105,13 +116,55 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Deploy to ${{ github.event.inputs.environment }}
-        uses: steebchen/kubectl@v2
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
         with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          command: |
-            apply -f k8s/${{ github.event.inputs.environment }}/ &&
-            set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:latest -n ${{ github.event.inputs.environment }} &&
-            set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:latest -n ${{ github.event.inputs.environment }} &&
-            rollout status deployment/backend -n ${{ github.event.inputs.environment }} &&
-            rollout status deployment/frontend -n ${{ github.event.inputs.environment }}
+          version: 'latest'
+
+      - name: Configure Kube Config
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG" > $HOME/.kube/config
+
+      - name: Deploy to UAT
+        run: |
+          kubectl apply -f k8s/uat/
+          kubectl set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ github.event.inputs.image_tag }} -n uat
+          kubectl set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ github.event.inputs.image_tag }} -n uat
+          kubectl rollout status deployment/backend -n uat
+          kubectl rollout status deployment/frontend -n uat
+
+  deploy-to-prod:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Configure Kube Config
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG" > $HOME/.kube/config
+
+      - name: Deploy to Prod
+        run: |
+          kubectl apply -f k8s/prod/
+          kubectl set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ github.event.inputs.image_tag }} -n prod
+          kubectl set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ github.event.inputs.image_tag }} -n prod
+          kubectl rollout status deployment/backend -n prod
+          kubectl rollout status deployment/frontend -n prod
