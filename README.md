@@ -222,18 +222,31 @@ O CI/CD fará todo o deploy automático.
 ### Push na branch `main`
 
 1. Build do backend (Maven) e frontend (npm)
-2. Docker build + push para Docker Hub com tags `sha-<commit>` e `latest`
-3. `kubectl apply -f k8s/database/` (PostgreSQL — idempotente)
-4. `kubectl apply -f k8s/dev/` + `kubectl set image` com o SHA do commit
-5. Aplicação disponível em `https://dev.app.141-148-93-60.sslip.io`
+2. Docker build (multi-arch `linux/arm64`) + push para Docker Hub com tags `sha-<commit>` e `latest`
+3. `kubectl apply -f k8s/dev/namespace.yaml` + `kubectl apply -f k8s/dev/`
+4. Aplicação disponível em `https://dev.app.141-148-93-60.sslip.io`
 
 ### Deploy manual (UAT ou PROD)
 
-1. GitHub > Actions > workflow `CI/CD` > Run workflow
-2. Escolher `uat` ou `prod`
+Pelo navegador:
+1. GitHub > **Actions** > workflow **CI/CD** > **Run workflow**
+2. Escolher `uat` ou `prod` no campo **environment**
 3. Opcional: informar uma tag específica (`latest` por padrão)
-4. Pipeline aplica os manifests e faz deploy da imagem escolhida
+4. Clicar em **Run workflow**
 5. Aplicação disponível em `https://uat.app.141-148-93-60.sslip.io` ou `https://app.141-148-93-60.sslip.io`
+
+Pelo CLI (requer [GitHub CLI](https://cli.github.com/)):
+
+```bash
+# Deploy no UAT
+gh workflow run ci-cd.yml -f environment=uat
+
+# Deploy no PROD
+gh workflow run ci-cd.yml -f environment=prod
+
+# Deploy com tag específica
+gh workflow run ci-cd.yml -f environment=prod -f image_tag=v1.2.3
+```
 
 ## Rodar localmente (desenvolvimento)
 
