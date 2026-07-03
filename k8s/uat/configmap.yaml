@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: uat
+data:
+  DB_HOST: postgres.database.svc.cluster.local
+  DB_PORT: "5432"
+  DB_NAME: appdb
+  DB_SCHEMA: uat_schema
+  SPRING_PROFILES_ACTIVE: uat
+  ENVIRONMENT: uat
+  VITE_API_URL: ""

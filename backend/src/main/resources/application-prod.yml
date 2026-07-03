@@ -1,0 +1,8 @@
+spring:
+  flyway:
+    schemas: prod_schema
+    default-schema: prod_schema
+  jpa:
+    properties:
+      hibernate:
+        default_schema: prod_schema

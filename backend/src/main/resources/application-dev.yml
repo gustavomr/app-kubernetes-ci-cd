@@ -1,0 +1,8 @@
+spring:
+  flyway:
+    schemas: dev_schema
+    default-schema: dev_schema
+  jpa:
+    properties:
+      hibernate:
+        default_schema: dev_schema

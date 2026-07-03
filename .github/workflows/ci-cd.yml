@@ -1,0 +1,117 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente para deploy manual'
+        required: true
+        type: choice
+        options:
+          - uat
+          - prod
+
+env:
+  DOCKER_USER: gustavomr
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy-dev:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Build Backend
+        run: mvn package -DskipTests -q
+        working-directory: ./backend
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Build Frontend
+        run: |
+          npm install
+          npm run build
+        working-directory: ./frontend
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.DOCKER_USER }}/app-backend:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKER_USER }}/app-backend:latest
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKER_USER }}/app-frontend:latest
+
+      - name: Deploy Database (idempotent)
+        uses: steebchen/kubectl@v2
+        with:
+          config: ${{ secrets.KUBE_CONFIG }}
+          command: |
+            apply -f k8s/database/namespace.yaml &&
+            apply -f k8s/database/postgres-secret.yaml &&
+            apply -f k8s/database/
+
+      - name: Deploy to Dev (idempotent + image update)
+        uses: steebchen/kubectl@v2
+        with:
+          config: ${{ secrets.KUBE_CONFIG }}
+          command: |
+            apply -f k8s/dev/ &&
+            set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ env.IMAGE_TAG }} -n dev &&
+            set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }} -n dev &&
+            rollout status deployment/backend -n dev &&
+            rollout status deployment/frontend -n dev
+
+  deploy-manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        uses: steebchen/kubectl@v2
+        with:
+          config: ${{ secrets.KUBE_CONFIG }}
+          command: |
+            apply -f k8s/${{ github.event.inputs.environment }}/ &&
+            set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:latest -n ${{ github.event.inputs.environment }} &&
+            set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:latest -n ${{ github.event.inputs.environment }} &&
+            rollout status deployment/backend -n ${{ github.event.inputs.environment }} &&
+            rollout status deployment/frontend -n ${{ github.event.inputs.environment }}

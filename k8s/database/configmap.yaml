@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: database
+data:
+  init.sql: |
+    CREATE SCHEMA IF NOT EXISTS dev_schema;
+    CREATE SCHEMA IF NOT EXISTS uat_schema;
+    CREATE SCHEMA IF NOT EXISTS prod_schema;

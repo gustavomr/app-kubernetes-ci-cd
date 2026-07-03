@@ -1,0 +1,8 @@
+spring:
+  flyway:
+    schemas: uat_schema
+    default-schema: uat_schema
+  jpa:
+    properties:
+      hibernate:
+        default_schema: uat_schema

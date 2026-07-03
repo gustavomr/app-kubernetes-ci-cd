@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: prod
+data:
+  DB_HOST: postgres.database.svc.cluster.local
+  DB_PORT: "5432"
+  DB_NAME: appdb
+  DB_SCHEMA: prod_schema
+  SPRING_PROFILES_ACTIVE: prod
+  ENVIRONMENT: prod
+  VITE_API_URL: ""
