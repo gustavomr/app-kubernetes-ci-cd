@@ -97,6 +97,7 @@ jobs:
 
       - name: Deploy to Dev
         run: |
+          kubectl apply -f k8s/dev/namespace.yaml
           kubectl apply -f k8s/dev/
           kubectl set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ env.IMAGE_TAG }} -n dev
           kubectl set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }} -n dev
@@ -130,6 +131,7 @@ jobs:
 
       - name: Deploy to UAT
         run: |
+          kubectl apply -f k8s/uat/namespace.yaml
           kubectl apply -f k8s/uat/
           kubectl set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ github.event.inputs.image_tag }} -n uat
           kubectl set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ github.event.inputs.image_tag }} -n uat
@@ -163,6 +165,7 @@ jobs:
 
       - name: Deploy to Prod
         run: |
+          kubectl apply -f k8s/prod/namespace.yaml
           kubectl apply -f k8s/prod/
           kubectl set image deployment/backend backend=${{ env.DOCKER_USER }}/app-backend:${{ github.event.inputs.image_tag }} -n prod
           kubectl set image deployment/frontend frontend=${{ env.DOCKER_USER }}/app-frontend:${{ github.event.inputs.image_tag }} -n prod
