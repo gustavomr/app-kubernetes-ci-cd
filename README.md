@@ -231,8 +231,8 @@ O CI/CD fará todo o deploy automático.
 Pelo navegador:
 1. GitHub > **Actions** > workflow **CI/CD** > **Run workflow**
 2. Escolher `uat` ou `prod` no campo **environment**
-3. Opcional: informar uma tag específica (`latest` por padrão)
-4. Clicar em **Run workflow**
+3. Clicar em **Run workflow**
+4. O pipeline faz `rollout restart` dos deployments, puxando a imagem `:latest`
 5. Aplicação disponível em `https://uat.app.141-148-93-60.sslip.io` ou `https://app.141-148-93-60.sslip.io`
 
 Pelo CLI (requer [GitHub CLI](https://cli.github.com/)):
@@ -243,9 +243,6 @@ gh workflow run ci-cd.yml -f environment=uat
 
 # Deploy no PROD
 gh workflow run ci-cd.yml -f environment=prod
-
-# Deploy com tag específica
-gh workflow run ci-cd.yml -f environment=prod -f image_tag=v1.2.3
 ```
 
 ## Rodar localmente (desenvolvimento)
