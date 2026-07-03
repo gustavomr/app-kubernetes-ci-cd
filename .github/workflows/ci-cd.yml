@@ -64,6 +64,7 @@ jobs:
         with:
           context: ./backend
           push: true
+          platforms: linux/arm64
           tags: |
             ${{ env.DOCKER_USER }}/app-backend:${{ env.IMAGE_TAG }}
             ${{ env.DOCKER_USER }}/app-backend:latest
@@ -73,6 +74,7 @@ jobs:
         with:
           context: ./frontend
           push: true
+          platforms: linux/arm64
           tags: |
             ${{ env.DOCKER_USER }}/app-frontend:${{ env.IMAGE_TAG }}
             ${{ env.DOCKER_USER }}/app-frontend:latest
