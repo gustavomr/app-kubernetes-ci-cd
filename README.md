@@ -219,30 +219,42 @@ O CI/CD fará todo o deploy automático.
 
 ## CI/CD — Como funciona
 
+### PR aberto
+
+```yaml
+# Job: validate
+# Build do backend + frontend (sem deploy)
+# Se falhar, o merge é bloqueado
+```
+
 ### Push na branch `main`
 
 1. Build do backend (Maven) e frontend (npm)
-2. Docker build (multi-arch `linux/arm64`) + push para Docker Hub com tags `sha-<commit>` e `latest`
+2. Docker build (multi-arch `linux/arm64`) + push para Docker Hub com tags `sha` e `latest`
 3. `kubectl apply -f k8s/dev/namespace.yaml` + `kubectl apply -f k8s/dev/`
-4. Aplicação disponível em `https://dev.app.141-148-93-60.sslip.io`
+4. Deploy automático em dev com a tag `sha`
+5. Aplicação disponível em `https://dev.app.141-148-93-60.sslip.io`
 
 ### Deploy manual (UAT ou PROD)
 
 Pelo navegador:
 1. GitHub > **Actions** > workflow **CI/CD** > **Run workflow**
-2. Escolher `uat` ou `prod` no campo **environment**
-3. Clicar em **Run workflow**
-4. O pipeline faz `rollout restart` dos deployments, puxando a imagem `:latest`
+2. Escolher `uat` ou `prod`
+3. Informar o **SHA da imagem** (mesmo que rodou em dev)
+4. Clicar em **Run workflow**
 5. Aplicação disponível em `https://uat.app.141-148-93-60.sslip.io` ou `https://app.141-148-93-60.sslip.io`
 
 Pelo CLI (requer [GitHub CLI](https://cli.github.com/)):
 
 ```bash
+# Pegar o SHA da última run em dev
+gh run list --workflow ci-cd.yml --branch main --json headSha -q '.[0].headSha'
+
 # Deploy no UAT
-gh workflow run ci-cd.yml -f environment=uat
+gh workflow run ci-cd.yml -f environment=uat -f image_tag=2bd5ada5969f3daabf4a0d9080915c78d873adf4
 
 # Deploy no PROD
-gh workflow run ci-cd.yml -f environment=prod
+gh workflow run ci-cd.yml -f environment=prod -f image_tag=2bd5ada5969f3daabf4a0d9080915c78d873adf4
 ```
 
 ## Rodar localmente (desenvolvimento)
