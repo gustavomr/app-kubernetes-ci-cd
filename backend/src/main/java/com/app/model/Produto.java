@@ -1,4 +1,4 @@
-package com.app.model;
+﻿package com.app.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -14,14 +14,18 @@ public class Produto {
     @Column(nullable = false, length = 255)
     private String nome;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "preco", nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
+
+    @Column(name = "valor", precision = 10, scale = 2)
+    private BigDecimal valor;
 
     public Produto() {}
 
     public Produto(String nome, BigDecimal preco) {
         this.nome = nome;
         this.preco = preco;
+        this.valor = preco;
     }
 
     public Long getId() {
@@ -41,10 +45,22 @@ public class Produto {
     }
 
     public BigDecimal getPreco() {
+        if (valor != null) return valor;
         return preco;
     }
 
     public void setPreco(BigDecimal preco) {
         this.preco = preco;
+        this.valor = preco;
+    }
+
+    public BigDecimal getValor() {
+        if (valor != null) return valor;
+        return preco;
+    }
+
+    public void setValor(BigDecimal valor) {
+        this.valor = valor;
+        this.preco = valor;
     }
 }
