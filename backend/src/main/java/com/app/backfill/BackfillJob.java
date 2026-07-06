@@ -23,8 +23,11 @@ public class BackfillJob {
         int updated = jdbc.update("""
             UPDATE produto
             SET valor = preco
-            WHERE valor IS NULL AND preco IS NOT NULL
-            LIMIT 1000
+            WHERE ctid IN (
+                SELECT ctid FROM produto
+                WHERE valor IS NULL AND preco IS NOT NULL
+                LIMIT 1000
+            )
         """);
 
         if (updated > 0) {
