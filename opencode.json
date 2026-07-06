@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "review",
+  "agent": {
+    "review": {
+      "description": "Revisa o código da branch atual e abre um PR contra main",
+      "mode": "primary",
+      "permission": {
+        "bash": "allow",
+        "edit": "deny"
+      }
+    }
+  },
+  "permission": {
+    "bash": {
+      "git *": "allow",
+      "gh *": "allow",
+      "mvn *": "allow",
+      "npm *": "allow",
+      "kubectl *": "allow",
+      "docker *": "allow",
+      "*": "ask"
+    },
+    "read": "allow",
+    "edit": "deny"
+  }
+}
