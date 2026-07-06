@@ -1,4 +1,4 @@
-﻿package com.app.model;
+package com.app.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
