@@ -14,18 +14,14 @@ public class Produto {
     @Column(nullable = false, length = 255)
     private String nome;
 
-    @Column(name = "preco", nullable = false, precision = 10, scale = 2)
-    private BigDecimal preco;
-
-    @Column(name = "valor", precision = 10, scale = 2)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valor;
 
     public Produto() {}
 
-    public Produto(String nome, BigDecimal preco) {
+    public Produto(String nome, BigDecimal valor) {
         this.nome = nome;
-        this.preco = preco;
-        this.valor = preco;
+        this.valor = valor;
     }
 
     public Long getId() {
@@ -44,23 +40,19 @@ public class Produto {
         this.nome = nome;
     }
 
-    public BigDecimal getPreco() {
-        if (valor != null) return valor;
-        return preco;
-    }
-
-    public void setPreco(BigDecimal preco) {
-        this.preco = preco;
-        this.valor = preco;
-    }
-
     public BigDecimal getValor() {
-        if (valor != null) return valor;
-        return preco;
+        return valor;
     }
 
     public void setValor(BigDecimal valor) {
         this.valor = valor;
-        this.preco = valor;
+    }
+
+    public BigDecimal getPreco() {
+        return valor;
+    }
+
+    public void setPreco(BigDecimal preco) {
+        this.valor = preco;
     }
 }
