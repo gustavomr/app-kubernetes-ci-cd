@@ -11,4 +11,3 @@ data:
   SPRING_PROFILES_ACTIVE: dev
   ENVIRONMENT: dev
   VITE_API_URL: ""
-  VITE_ENVIRONMENT: development

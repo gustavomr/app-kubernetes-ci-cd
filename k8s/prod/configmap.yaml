@@ -11,4 +11,3 @@ data:
   SPRING_PROFILES_ACTIVE: prod
   ENVIRONMENT: prod
   VITE_API_URL: ""
-  VITE_ENVIRONMENT: production
