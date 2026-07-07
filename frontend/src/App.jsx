@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useFlag } from '@rocketflag/react-sdk';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
-const FLAG_ID = 'HDVef5DekXPD9BAiMDZN';
+const FLAG_ID = 'XdWxfo6rgDIEAMok7W4V';
+const ENV = import.meta.env.VITE_ENVIRONMENT || 'development';
 
 function App() {
   const [produtos, setProdutos] = useState([]);
@@ -11,7 +12,7 @@ function App() {
   const [nome, setNome] = useState('');
   const [valor, setValor] = useState('');
 
-  const { enabled: addEnabled, loading: flagLoading } = useFlag(FLAG_ID);
+  const { enabled: addEnabled, loading: flagLoading } = useFlag(FLAG_ID, { env: ENV });
 
   useEffect(() => {
     fetch(`${API_URL}/api/produtos`)

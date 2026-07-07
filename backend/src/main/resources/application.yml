@@ -21,7 +21,7 @@ spring:
 
 rocketflag:
   api-url: https://api.rocketflag.app
-  flag-id: HDVef5DekXPD9BAiMDZN
+  flag-id: XdWxfo6rgDIEAMok7W4V
 
 management:
   endpoints:
