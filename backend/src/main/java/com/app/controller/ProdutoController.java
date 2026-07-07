@@ -2,6 +2,7 @@ package com.app.controller;
 
 import com.app.model.Produto;
 import com.app.repository.ProdutoRepository;
+import com.app.service.RocketflagService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +13,11 @@ import java.util.List;
 public class ProdutoController {
 
     private final ProdutoRepository repository;
+    private final RocketflagService rocketflagService;
 
-    public ProdutoController(ProdutoRepository repository) {
+    public ProdutoController(ProdutoRepository repository, RocketflagService rocketflagService) {
         this.repository = repository;
+        this.rocketflagService = rocketflagService;
     }
 
     @GetMapping
@@ -23,7 +26,10 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> criar(@RequestBody Produto produto) {
+    public ResponseEntity<?> criar(@RequestBody Produto produto) {
+        if (!rocketflagService.isFeatureEnabled()) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(repository.save(produto));
     }
 }
