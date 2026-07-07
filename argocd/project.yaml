@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: app-kubernetes-ci-cd
+  namespace: argocd
+spec:
+  description: "Projeto da aplicacao Kubernetes CI/CD"
+  sourceRepos:
+    - https://github.com/gustavomr/app-kubernetes-ci-cd
+  destinations:
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: uat
+      server: https://kubernetes.default.svc
+    - namespace: prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
