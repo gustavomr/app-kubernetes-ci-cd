@@ -4,7 +4,6 @@ COPY package.json .
 RUN npm install
 COPY . .
 ARG VITE_API_URL
-ARG VITE_ENVIRONMENT
 RUN npm run build
 
 FROM node:22-alpine

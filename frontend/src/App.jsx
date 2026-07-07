@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useFlag } from '@rocketflag/react-sdk';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
-const FLAG_ID = 'XdWxfo6rgDIEAMok7W4V';
-const ENV = import.meta.env.VITE_ENVIRONMENT || 'development';
 
 function App() {
   const [produtos, setProdutos] = useState([]);
@@ -11,8 +8,7 @@ function App() {
   const [error, setError] = useState(null);
   const [nome, setNome] = useState('');
   const [valor, setValor] = useState('');
-
-  const { enabled: addEnabled, loading: flagLoading } = useFlag(FLAG_ID, { env: ENV });
+  const [addEnabled, setAddEnabled] = useState(null);
 
   useEffect(() => {
     fetch(`${API_URL}/api/produtos`)
@@ -28,6 +24,13 @@ function App() {
         setError(err.message);
         setLoading(false);
       });
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/rocketflag/add-produto`)
+      .then((r) => r.json())
+      .then((d) => setAddEnabled(d.enabled))
+      .catch(() => setAddEnabled(false));
   }, []);
 
   const handleSubmit = async (e) => {
@@ -55,7 +58,7 @@ function App() {
     <div className="container">
       <h1>Produtos</h1>
 
-      {flagLoading ? (
+      {addEnabled === null ? (
         <p className="flag-check">Verificando disponibilidade...</p>
       ) : addEnabled ? (
         <form className="add-form" onSubmit={handleSubmit}>
