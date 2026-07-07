@@ -6,3 +6,6 @@ spring:
     properties:
       hibernate:
         default_schema: dev_schema
+
+rocketflag:
+  environment: development

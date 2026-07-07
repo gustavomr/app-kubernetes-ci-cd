@@ -6,3 +6,6 @@ spring:
     properties:
       hibernate:
         default_schema: prod_schema
+
+rocketflag:
+  environment: production

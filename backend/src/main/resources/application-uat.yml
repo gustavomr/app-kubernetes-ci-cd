@@ -6,3 +6,6 @@ spring:
     properties:
       hibernate:
         default_schema: uat_schema
+
+rocketflag:
+  environment: uat

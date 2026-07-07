@@ -19,6 +19,10 @@ spring:
     schemas: ${DB_SCHEMA:public}
     default-schema: ${DB_SCHEMA:public}
 
+rocketflag:
+  api-url: https://api.rocketflag.app
+  flag-id: XdWxfo6rgDIEAMok7W4V
+
 management:
   endpoints:
     web:
