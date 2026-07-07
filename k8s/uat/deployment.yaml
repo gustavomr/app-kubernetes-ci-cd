@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: backend
-          image: gustavomr/app-backend:latest
+          image: gustavomr/app-backend:c97d4e2315c0b6549a6de48ad1a5040b7ce2a116
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -82,7 +82,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: frontend
-          image: gustavomr/app-frontend:latest
+          image: gustavomr/app-frontend:c97d4e2315c0b6549a6de48ad1a5040b7ce2a116
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
